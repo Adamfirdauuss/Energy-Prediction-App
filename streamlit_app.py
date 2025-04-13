@@ -1,138 +1,117 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import plotly.express as px
-import plotly.graph_objects as go
-from sklearn.linear_model import LinearRegression
-from sklearn.multioutput import MultiOutputRegressor
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import joblib
+from streamlit_option_menu import option_menu
 
-# Set the dark theme
-st.set_page_config(page_title="Energy Prediction App", layout="wide", initial_sidebar_state="collapsed")
+# Page config
+st.set_page_config(page_title="⚡ Energy Forecasting App", layout="wide", initial_sidebar_state="collapsed")
 
-# Load the dataset
-@st.cache
+# Custom CSS for dark theme and nav bar
+st.markdown("""
+    <style>
+    body {
+        background-color: #121212;
+        color: #f0f0f0;
+    }
+    .main, .block-container {
+        background-color: #121212;
+        color: #f0f0f0;
+    }
+    .css-1d391kg, .stSlider label, .stSelectbox label, .stRadio label, .stTextInput label {
+        color: #f0f0f0 !important;
+    }
+    .css-145kmo2 a {
+        color: #f0f0f0;
+    }
+    .css-1cpxqw2, .stMarkdown, .stHeading {
+        color: #f0f0f0 !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# Load data
+@st.cache_data
 def load_data():
-    url = 'https://raw.githubusercontent.com/Adamfirdauuss/Energy-Prediction-App/refs/heads/master/power%20Generation%20and%20consumption.csv'
-    df = pd.read_csv(url)
-    
-    # Ensure Date_Time column is properly cleaned and converted to datetime
-    df["Date_Time"] = pd.to_datetime(df["Date_Time"], errors='coerce')  # 'coerce' will turn invalid dates to NaT
-    df.dropna(subset=["Date_Time"], inplace=True)  # Drop rows where Date_Time is NaT
-    return df
+    url = 'https://raw.githubusercontent.com/Adamfirdauuss/Energy-Prediction-App/master/power%20Generation%20and%20consumption.csv'
+    return pd.read_csv(url)
 
 df = load_data()
 
+# Load trained model
+@st.cache_resource
+def load_model():
+    return joblib.load("linear_model.pkl")
+
+model = load_model()
+
+# Navigation
+selected = option_menu(
+    menu_title=None,
+    options=["Home", "Forecast", "Visual Insight"],
+    icons=["house", "bar-chart", "activity"],
+    orientation="horizontal"
+)
+
 # Home Page
-def home():
+if selected == "Home":
     st.title("⚡ Energy Generation & Consumption Forecasting")
     st.markdown("""
-    #### About the Dataset
-    This dataset consists of hourly electricity generation and consumption (demand) in Turkey.
-    The dataset spans from January 2020 to December 2022. It includes generation by production type (natural gas, geothermal, solar, etc.) and total generation.
-    
-    The data was sourced from EPIAS and is ideal for Short-Term Load Forecasting (STLF), helping develop better day-ahead generator planning.
-    """)
+    Welcome to the Energy Forecasting App! This tool helps predict **total electricity generation** and **consumption** in **Turkey** using historical data from **2020 to 2022**, provided by **EPIAS**.
 
-    st.markdown("""
-    ### Key Features:
-    - **Total Generation**: Total energy generation by all sources
-    - **Consumption**: Energy consumption/demand across the country
-    - **Energy Types**: Breakdown by generation type (e.g., solar, wind, natural gas)
+    **Dataset Summary**:
+    - Time Period: January 2020 to December 2022
+    - Frequency: Hourly aggregated
+    - Includes: Energy generation by type (Natural Gas, Geothermal, Solar, etc.) and total demand
+
+    **Why it matters**:
+    - Improve electricity demand planning
+    - Support decision-making for renewable integration
+    - Optimize costs and avoid overproduction
+    - Help reduce CO₂ emissions
+    - Enhance energy efficiency forecasting
     """)
 
 # Forecast Page
-def forecast():
-    st.title("📊 Energy Forecasting")
-    st.markdown("""
-    This page allows you to forecast total energy generation and consumption based on historical data.
-    You can interactively input values to predict future energy demand and generation across different sources.
-    """)
+elif selected == "Forecast":
+    st.title("📊 Forecast")
+    st.markdown("Use the sliders below to input values and predict Total Generation and Consumption.")
 
-    # Get user input for forecasting
+    features = df.drop(columns=["Date_Time", "Total (MWh)", "Consumption (MWh)"]).columns
     user_input = {}
-    features = df.columns.difference(['Date_Time', 'Total (MWh)', 'Consumption (MWh)'])
-    
+
     for feature in features:
         min_val = float(df[feature].min())
         max_val = float(df[feature].max())
         mean_val = float(df[feature].mean())
-        user_input[feature] = st.slider(f'{feature}', min_val, max_val, mean_val)
+        if min_val == max_val:
+            max_val += 1  # Prevent slider crash
+        user_input[feature] = st.slider(
+            feature, float(min_val), float(max_val), float(mean_val)
+        )
 
-    # Convert user input to DataFrame for prediction
     input_df = pd.DataFrame([user_input])
+    prediction = model.predict(input_df)[0]
 
-    # Load the trained model
-    @st.cache
-    def load_model():
-        return joblib.load("linear_model.pkl")  # Make sure you have this file
-
-    model = load_model()
-
-    # Predict based on input
-    prediction = model.predict(input_df)
-    st.write("Predicted Energy Generation and Consumption (MWh):")
-    st.write(f"Total Generation: {prediction[0][0]:.2f} MWh")
-    st.write(f"Total Consumption: {prediction[0][1]:.2f} MWh")
+    st.subheader("🔮 Prediction Results")
+    st.markdown(f"**Total Generation (MWh):** {prediction[0]:,.2f}")
+    st.markdown(f"**Total Consumption (MWh):** {prediction[1]:,.2f}")
 
 # Visual Insight Page
-def visual_insights():
+elif selected == "Visual Insight":
     st.title("📈 Visual Insights")
+    st.markdown("Interactive charts based on energy source selection.")
 
-    # Visualize total energy generation and consumption over time
-    st.markdown("""
-    Explore how total energy generation and consumption have changed over time in Turkey.
-    You can select different energy types for a more detailed comparison.
-    """)
+    energy_sources = df.drop(columns=["Date_Time", "Total (MWh)", "Consumption (MWh)"]).columns.tolist()
+    selected_source = st.selectbox("Choose an energy source to visualize:", energy_sources)
 
-    # Plot total generation vs consumption
-    fig = go.Figure()
+    # Convert date column to datetime
+    df["Date_Time"] = pd.to_datetime(df["Date_Time"])
 
-    fig.add_trace(go.Scatter(x=df['Date_Time'], y=df['Total (MWh)'], mode='lines', name='Total Generation'))
-    fig.add_trace(go.Scatter(x=df['Date_Time'], y=df['Consumption (MWh)'], mode='lines', name='Total Consumption'))
+    fig1 = px.line(df, x="Date_Time", y="Total (MWh)", title="Total Energy Generation Over Time")
+    fig2 = px.line(df, x="Date_Time", y="Consumption (MWh)", title="Total Energy Consumption Over Time")
+    fig3 = px.line(df, x="Date_Time", y=selected_source, title=f"{selected_source} Over Time")
 
-    fig.update_layout(title='Total Generation vs Consumption (2020-2022)', xaxis_title='Date', yaxis_title='Energy (MWh)')
-    st.plotly_chart(fig)
-
-    # Allow user to select energy type for comparison
-    energy_type = st.selectbox('Select Energy Type to Compare', ['Natural Gas', 'Solar', 'Wind', 'Geothermal'])
-
-    # Plot selected energy type
-    fig_energy = go.Figure()
-
-    fig_energy.add_trace(go.Scatter(x=df['Date_Time'], y=df[energy_type], mode='lines', name=energy_type))
-    fig_energy.update_layout(title=f'{energy_type} Generation Over Time (2020-2022)', xaxis_title='Date', yaxis_title='Energy (MWh)')
-
-    st.plotly_chart(fig_energy)
-
-# Navigation
-def main():
-    st.markdown("""
-    <style>
-        body {
-            background-color: #121212;
-            color: #FFFFFF;
-        }
-        .css-1v0mbdj {
-            color: #FFFFFF !important;
-        }
-        .streamlit-expanderHeader {
-            color: #FFFFFF !important;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    # Navigation menu
-    page = st.selectbox('Select Page', ['Home', 'Forecast', 'Visual Insights'])
-
-    if page == 'Home':
-        home()
-    elif page == 'Forecast':
-        forecast()
-    elif page == 'Visual Insights':
-        visual_insights()
-
-# Run the app
-if __name__ == "__main__":
-    main()
+    st.plotly_chart(fig1, use_container_width=True)
+    st.plotly_chart(fig2, use_container_width=True)
+    st.plotly_chart(fig3, use_container_width=True)
