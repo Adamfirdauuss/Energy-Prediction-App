@@ -102,17 +102,39 @@ elif selected == "Visual Insight":
     st.title("📈 Visual Insights")
     st.markdown("Interactive charts based on energy source selection.")
 
-    energy_sources = df.drop(columns=["Date_Time", "Total (MWh)", "Consumption (MWh)"]).columns.tolist()
-    selected_source = st.selectbox("Choose an energy source to visualize:", energy_sources)
+    # Create columns to display charts side by side
+    col1, col2 = st.columns(2)
 
     # Convert date column to datetime with a custom format
     df["Date_Time"] = pd.to_datetime(df["Date_Time"], format="%d.%m.%Y %H:%M")
 
-    fig1 = px.line(df, x="Date_Time", y="Total (MWh)", title="Total Energy Generation Over Time")
-    fig2 = px.line(df, x="Date_Time", y="Consumption (MWh)", title="Total Energy Consumption Over Time")
-    fig3 = px.line(df, x="Date_Time", y=selected_source, title=f"{selected_source} Over Time")
+    # First chart for Total Energy Generation Over Time
+    with col1:
+        fig1 = px.line(df, x="Date_Time", y="Total (MWh)", 
+                       title="Total Energy Generation Over Time", 
+                       line_shape='linear', 
+                       labels={"Total (MWh)": "Energy Generation (MWh)"})
+        fig1.update_layout(
+            plot_bgcolor='rgb(50, 50, 50)',  # Dark background
+            paper_bgcolor='rgb(50, 50, 50)',  # Dark background
+            font=dict(color='white'),  # Light font for contrast
+            xaxis=dict(showgrid=True, gridcolor='rgba(255, 255, 255, 0.3)'),
+            yaxis=dict(showgrid=True, gridcolor='rgba(255, 255, 255, 0.3)')
+        )
+        st.plotly_chart(fig1, use_container_width=True)
 
-    st.plotly_chart(fig1, use_container_width=True)
-    st.plotly_chart(fig2, use_container_width=True)
-    st.plotly_chart(fig3, use_container_width=True)
+    # Second chart for Total Energy Consumption Over Time
+    with col2:
+        fig2 = px.line(df, x="Date_Time", y="Consumption (MWh)", 
+                       title="Total Energy Consumption Over Time", 
+                       line_shape='linear', 
+                       labels={"Consumption (MWh)": "Energy Consumption (MWh)"})
+        fig2.update_layout(
+            plot_bgcolor='rgb(50, 50, 50)',  # Dark background
+            paper_bgcolor='rgb(50, 50, 50)',  # Dark background
+            font=dict(color='white'),  # Light font for contrast
+            xaxis=dict(showgrid=True, gridcolor='rgba(255, 255, 255, 0.3)'),
+            yaxis=dict(showgrid=True, gridcolor='rgba(255, 255, 255, 0.3)')
+        )
+        st.plotly_chart(fig2, use_container_width=True)
 
