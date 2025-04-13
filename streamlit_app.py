@@ -105,8 +105,8 @@ elif selected == "Visual Insight":
     energy_sources = df.drop(columns=["Date_Time", "Total (MWh)", "Consumption (MWh)"]).columns.tolist()
     selected_source = st.selectbox("Choose an energy source to visualize:", energy_sources)
 
-    # Convert date column to datetime
-    df["Date_Time"] = pd.to_datetime(df["Date_Time"])
+    # Convert date column to datetime with a custom format
+    df["Date_Time"] = pd.to_datetime(df["Date_Time"], format="%d.%m.%Y %H:%M")
 
     fig1 = px.line(df, x="Date_Time", y="Total (MWh)", title="Total Energy Generation Over Time")
     fig2 = px.line(df, x="Date_Time", y="Consumption (MWh)", title="Total Energy Consumption Over Time")
@@ -115,3 +115,4 @@ elif selected == "Visual Insight":
     st.plotly_chart(fig1, use_container_width=True)
     st.plotly_chart(fig2, use_container_width=True)
     st.plotly_chart(fig3, use_container_width=True)
+
