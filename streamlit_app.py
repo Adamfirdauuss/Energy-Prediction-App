@@ -1,100 +1,131 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
+import plotly.express as px
 import joblib
-import matplotlib.pyplot as plt
-import seaborn as sns
 
-st.set_page_config(page_title="⚡ Energy Forecasting", layout="wide")
-
-# Set dark theme with custom CSS
-st.markdown("""
-    <style>
-        body {
-            background-color: #1e1e1e;
-            color: #f0f0f0;
-        }
-        .stApp {
-            background-color: #1e1e1e;
-        }
-        .css-1d391kg, .css-1v3fvcr {
-            background-color: #2e2e2e !important;
-            color: white !important;
-        }
-        .css-1v0mbdj {
-            color: white !important;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-# Load model
-model = joblib.load("linear_model.pkl")
-
-# Load dataset for visualizations
+# Load dataset
 @st.cache_data
 def load_data():
-    df = pd.read_csv("power Generation and consumption.csv", parse_dates=["Date_Time"])
+    url = 'https://raw.githubusercontent.com/Adamfirdauuss/Energy-Prediction-App/master/power%20Generation%20and%20consumption.csv'
+    df = pd.read_csv(url)
+    df['Date_Time'] = pd.to_datetime(df['Date_Time'], dayfirst=True)
     return df
 
 df = load_data()
+model = joblib.load("linear_model.pkl")
 
-# Sidebar navigation
-page = st.sidebar.radio("Navigation", ["🏠 Home", "📊 Forecast", "📈 Visual Insights"])
+# Custom CSS for dark theme and navigation
+st.markdown("""
+    <style>
+    body {
+        background-color: #1e1e2f;
+        color: white;
+    }
+    .main {
+        background-color: #1e1e2f;
+    }
+    .stApp {
+        background-color: #1e1e2f;
+    }
+    h1, h2, h3, h4, h5, h6, .css-1v0mbdj {
+        color: white !important;
+    }
+    .nav-container {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 2rem;
+        background-color: #333;
+        padding: 1rem;
+        border-radius: 8px;
+    }
+    .nav-container a {
+        color: #fff;
+        text-decoration: none;
+        font-size: 18px;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+    }
+    .nav-container a:hover {
+        background-color: #555;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-if page == "🏠 Home":
-    st.title("⚡ Energy Generation & Consumption Forecasting")
+# Navigation
+page = st.experimental_get_query_params().get("page", ["Home"])[0]
+nav = st.markdown(f"""
+    <div class="nav-container">
+        <a href="?page=Home">🏠 Home</a>
+        <a href="?page=Forecast">📊 Forecast</a>
+        <a href="?page=Visual Insights">📈 Visual Insights</a>
+    </div>
+""", unsafe_allow_html=True)
+
+# Pages
+if page == "Home":
+    st.title("⚡ Energy Generation & Consumption Forecasting in Turkey")
     st.markdown("""
-    This app uses historical electrical power generation and consumption data in Turkey (Jan 2020 - Dec 2022) to forecast future energy demands.
-    
-    **Use Cases:**
-    - Predict energy demand to avoid blackouts
-    - Optimize energy production schedules
-    - Support smart grid automation and planning
-    - Reduce costs with peak load shifting
-    - Aid renewable energy forecasting
+        #### About
+        This web application leverages historical electricity generation and consumption data from **Turkey (Jan 2020 - Dec 2022)**.
+
+        It is designed for: 
+        - 📉 Short Term Load Forecasting (STLF)
+        - 🔍 Insights into renewable vs non-renewable energy sources
+        - 🧠 Understanding which sources dominate energy supply
+
+        #### Why it matters:
+        - 🏷️ **Save costs** by optimizing generation planning
+        - ⚙️ **Prevent over/under-generation** with reliable forecasts
+        - 🌱 **Support sustainability** by tracking renewable growth
+        - ⚡ **Improve grid stability** through accurate planning
+        - 🧭 **Guide policy-making** with data-driven insights
+
+        Use the navigation above to explore predictions or dive into trends.
     """)
 
-elif page == "📊 Forecast":
+elif page == "Forecast":
     st.title("📊 Forecast Energy Demand")
+    st.markdown("""
+    Use the controls below to simulate a scenario. The model will forecast:
+    - Total Electricity Generation
+    - Consumption (Demand)
+    """)
 
-    # User inputs from sidebar
-    def user_inputs():
-        st.sidebar.header("Input Parameters")
-        input_features = [col for col in df.columns if col not in ['Date_Time', 'Total (MWh)', 'Consumption (MWh)']]
-        inputs = {}
-        for feature in input_features:
-            min_val = float(df[feature].min())
-            max_val = float(df[feature].max())
-            mean_val = float(df[feature].mean())
-            inputs[feature] = st.sidebar.slider(feature, min_val, max_val, mean_val)
-        return pd.DataFrame([inputs])
+    numeric_features = [col for col in df.columns if col not in ['Date_Time', 'Total (MWh)', 'Consumption (MWh)']]
 
-    input_df = user_inputs()
-    prediction = model.predict(input_df)
+    st.subheader("🔧 Adjust Energy Source Levels (MWh)")
+    user_input = {}
+    for feature in numeric_features:
+        min_val = float(df[feature].min())
+        max_val = float(df[feature].max())
+        mean_val = float(df[feature].mean())
+        user_input[feature] = st.slider(
+            f"{feature}", min_value=min_val, max_value=max_val, value=mean_val, step=1.0
+        )
 
-    st.subheader("Forecast Results")
-    st.metric(label="Predicted Total Generation (MWh)", value=f"{prediction[0][0]:,.2f}")
-    st.metric(label="Predicted Consumption (MWh)", value=f"{prediction[0][1]:,.2f}")
+    input_df = pd.DataFrame([user_input])
 
-elif page == "📈 Visual Insights":
-    st.title("📈 Visual Insights")
+    if st.button("Predict Energy Output"):
+        prediction = model.predict(input_df)[0]
+        st.success(f"🔌 Predicted Total Generation: {prediction[0]:,.2f} MWh")
+        st.success(f"🔥 Predicted Consumption: {prediction[1]:,.2f} MWh")
 
-    selected_feature = st.selectbox("Select a Feature to Analyze:", [col for col in df.columns if col not in ['Date_Time']])
+elif page == "Visual Insights":
+    st.title("📈 Interactive Energy Insights")
+    st.markdown("""
+    Visualize how energy sources relate to total generation and demand.
+    """)
 
-    fig, ax = plt.subplots(figsize=(12, 6))
-    sns.lineplot(x=df['Date_Time'], y=df[selected_feature], ax=ax, color='cyan')
-    ax.set_title(f"{selected_feature} Over Time", fontsize=16, color='white')
-    ax.set_xlabel("Date", fontsize=12, color='white')
-    ax.set_ylabel(selected_feature, fontsize=12, color='white')
-    ax.tick_params(colors='white')
-    fig.patch.set_facecolor('#1e1e1e')
-    ax.set_facecolor('#1e1e1e')
-    st.pyplot(fig)
+    energy_col = st.selectbox("Choose an energy type to compare:",
+                               [col for col in df.columns if col not in ['Date_Time', 'Total (MWh)', 'Consumption (MWh)']])
 
-    # Correlation heatmap
-    if st.checkbox("Show Correlation Heatmap"):
-        st.subheader("Correlation Heatmap")
-        corr = df.drop(columns=["Date_Time"]).corr()
-        fig2, ax2 = plt.subplots(figsize=(10, 6))
-        sns.heatmap(corr, cmap='coolwarm', annot=False, ax=ax2)
-        st.pyplot(fig2)
+    col1, col2 = st.columns(2)
+    with col1:
+        fig_total = px.line(df, x='Date_Time', y=['Total (MWh)', energy_col],
+                            title=f'{energy_col} vs Total Generation')
+        st.plotly_chart(fig_total, use_container_width=True)
+
+    with col2:
+        fig_cons = px.line(df, x='Date_Time', y=['Consumption (MWh)', energy_col],
+                           title=f'{energy_col} vs Consumption')
+        st.plotly_chart(fig_cons, use_container_width=True)
