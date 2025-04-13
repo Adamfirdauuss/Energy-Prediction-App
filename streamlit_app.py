@@ -129,3 +129,5 @@ elif page == "Visual Insights":
         fig_cons = px.line(df, x='Date_Time', y=['Consumption (MWh)', energy_col],
                            title=f'{energy_col} vs Consumption')
         st.plotly_chart(fig_cons, use_container_width=True)
+
+
