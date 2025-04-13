@@ -98,11 +98,16 @@ elif selected == "Forecast":
     st.markdown(f"**Total Consumption (MWh):** {prediction[1]:,.2f}")
 
 # Visual Insight Page
-import pandas as pd
-import plotly.express as px
-import streamlit as st
+# Make sure to have an initial 'if' or 'elif' block before this
+if selected == "Home":
+    st.title("🏠 Home")
+    st.markdown("Welcome to the Energy Generation and Consumption Forecasting app.")
+    st.markdown("This app helps forecast and visualize Turkey's energy consumption and generation data.")
 
-# Assuming your dataframe is already loaded as 'df'
+elif selected == "Forecast":
+    st.title("📊 Forecast")
+    st.markdown("Here, we predict energy demand based on the historical data of Turkey.")
+    # Add your forecast logic here (e.g., prediction model, data inputs, etc.)
 
 elif selected == "Visual Insight":
     st.title("📈 Visual Insights")
