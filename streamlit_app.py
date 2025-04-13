@@ -107,7 +107,7 @@ elif selected == "Visual Insight":
     selected_source = st.selectbox("Choose an energy source to visualize:", energy_sources)
 
     # Convert date column to datetime
-    df["Date_Time"] = pd.to_datetime(df["Date_Time"]) format='%d.%m.%Y %H:%M', errors='coerce')
+    df["Date_Time"] = pd.to_datetime(df["Date_Time"]) 
 
     fig1 = px.line(df, x="Date_Time", y="Total (MWh)", title="Total Energy Generation Over Time")
     fig2 = px.line(df, x="Date_Time", y="Consumption (MWh)", title="Total Energy Consumption Over Time")
