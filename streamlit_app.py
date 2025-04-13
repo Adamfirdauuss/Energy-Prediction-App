@@ -4,6 +4,9 @@ import plotly.express as px
 import joblib
 from streamlit_option_menu import option_menu
 
+# Convert 'Date_Time' to datetime format with the correct format
+df["Date_Time"] = pd.to_datetime(df["Date_Time"], format="%d.%m.%Y %H:%M")
+
 # Page config
 st.set_page_config(page_title="⚡ Energy Forecasting App", layout="wide", initial_sidebar_state="collapsed")
 
