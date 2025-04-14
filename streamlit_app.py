@@ -159,95 +159,105 @@ if selected == "Home":
   
 
 # Forecast Page
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
-import plotly.graph_objects as go
-
-# Assuming `df` is your data frame and `model` is your trained model
-
-# Forecast Page
-if selected == "Forecast":
+elif selected == "Forecast":
     st.title("📊 Forecast: Energy Generation & Consumption")
     st.markdown("Adjust the energy source inputs below to predict Turkey’s total electricity generation and consumption.")
 
+    # Get list of all input features
     features = df.drop(columns=["Date_Time", "Total (MWh)", "Consumption (MWh)"]).columns
     user_input = {}
 
-    for feature in features:
+    # Helper function to render sliders
+    def render_slider(col, feature):
         min_val = float(df[feature].min())
         max_val = float(df[feature].max())
         mean_val = float(df[feature].mean())
         if min_val == max_val:
             max_val += 1  # Prevent slider crash
-        user_input[feature] = st.slider(
-            feature, float(min_val), float(max_val), float(mean_val)
+        user_input[feature] = col.slider(
+            label=feature,
+            min_value=float(min_val),
+            max_value=float(max_val),
+            value=float(mean_val),
         )
 
+    st.subheader("🔧 Input Energy Sources")
+
+    # Grouping features
+    renewable = ["Dammed Hydro", "Wind", "Geothermal", "River", "Solar", "Biomass"]
+    non_renewable = ["Natural Gas", "Import Coal", "Asphaltite Coal", "Naphta", "Lignite", "Fuel Oil", "Black Coal", "LNG"]
+    other_sources = ["Import-Export", "Waste Heat"]
+
+    # Render sliders
+    with st.expander("🌱 Renewable Energy Sources"):
+        cols = st.columns(2)
+        for i, feature in enumerate(renewable):
+            render_slider(cols[i % 2], feature)
+
+    with st.expander("⚙️ Non-Renewable Energy Sources"):
+        cols = st.columns(2)
+        for i, feature in enumerate(non_renewable):
+            render_slider(cols[i % 2], feature)
+
+    with st.expander("📦 Import & Other Sources"):
+        cols = st.columns(2)
+        for i, feature in enumerate(other_sources):
+            render_slider(cols[i % 2], feature)
+
+    # Create input DataFrame
     input_df = pd.DataFrame([user_input])
+
+    # Ensure feature order matches model
+    try:
+        input_df = input_df[model.feature_names_in_]
+    except AttributeError:
+        st.error("Model doesn't contain feature names. Ensure the model was trained on a DataFrame.")
+        st.stop()
+    except KeyError:
+        st.error("Input features don't match model features. Please verify.")
+        st.stop()
+
+    # Prediction
     prediction = model.predict(input_df)[0]
 
-    # Display Results
+    # Display results
     st.subheader("🔮 Prediction Results")
 
-    # Display the prediction with lighter font color
     col1, col2 = st.columns(2)
-    col1.markdown("#### <span style='color:#bbb;'>Total Generation (MWh)</span>", unsafe_allow_html=True)
-    col1.markdown(f"<h3 style='color:white;'>{prediction[0]:,.2f}</h3>", unsafe_allow_html=True)
+    col1.metric("Total Generation (MWh)", f"{prediction[0]:,.2f}")
+    col2.metric("Total Consumption (MWh)", f"{prediction[1]:,.2f}")
 
-    col2.markdown("#### <span style='color:#bbb;'>Total Consumption (MWh)</span>", unsafe_allow_html=True)
-    col2.markdown(f"<h3 style='color:white;'>{prediction[1]:,.2f}</h3>", unsafe_allow_html=True)
-
-    # Calculate percentage difference
-    percentage_difference = ((prediction[1] - prediction[0]) / prediction[0]) * 100
-
-    # Display the percentage difference
-    st.markdown(f"### ⚡ Percentage Difference between Generation and Consumption: **{percentage_difference:.2f}%**")
-
-    # Improved Graph using Plotly Gauge (Radial Chart)
-    st.markdown("### 📊 Forecast Comparison")
-
-    fig = go.Figure()
-
-    # Add the generation gauge
-    fig.add_trace(go.Indicator(
-        mode="gauge+number",
-        value=prediction[0],
-        title={'text': "Total Generation (MWh)"},
-        gauge={'axis': {'range': [None, max(prediction)]},
-               'bar': {'color': "#00bcd4"},
-               'steps': [{'range': [0, prediction[0]], 'color': "#00bcd4"}]}))
-
-    # Add the consumption gauge
-    fig.add_trace(go.Indicator(
-        mode="gauge+number",
-        value=prediction[1],
-        title={'text': "Total Consumption (MWh)"},
-        gauge={'axis': {'range': [None, max(prediction)]},
-               'bar': {'color': "#ff9800"},
-               'steps': [{'range': [0, prediction[1]], 'color': "#ff9800"}]}))
-
-    fig.update_layout(
-        height=400,
-        width=800,
-        title="Energy Forecast"
+    # Text below results in light color for visibility
+    st.markdown(
+        "<p style='color:#AAAAAA;'>Total Generation (MWh): {0:,.2f}</p>".format(prediction[0]),
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        "<p style='color:#AAAAAA;'>Total Consumption (MWh): {0:,.2f}</p>".format(prediction[1]),
+        unsafe_allow_html=True,
     )
 
-    st.plotly_chart(fig)
+    # Improved Graph (Bar Chart)
+    st.markdown("### 📈 Forecast Breakdown")
+    data = pd.DataFrame({
+        "Energy Type": ["Total Generation", "Total Consumption"],
+        "MWh": [prediction[0], prediction[1]]
+    })
 
-    # Prepare data for download (input + prediction)
-    output_df = input_df.copy()
-    output_df["Total Generation (MWh)"] = prediction[0]
-    output_df["Total Consumption (MWh)"] = prediction[1]
-    output_df["Percentage Difference"] = f"{percentage_difference:.2f}%"
+    st.bar_chart(data.set_index("Energy Type"))
 
-    # Download button with dark font for visibility
+    # Optional: Add download button with prediction results
+    download_data = input_df.copy()
+    download_data['Total Generation (MWh)'] = prediction[0]
+    download_data['Total Consumption (MWh)'] = prediction[1]
+
     st.download_button(
-        label="📥 Download Forecast",
-        data=output_df.to_csv(index=False),
+        label="📥 Download Forecast with Results",
+        data=download_data.to_csv(index=False),
         file_name="energy_forecast_with_results.csv",
         mime="text/csv",
-        help="Download input and forecast results",
+        help="Click to download the forecasted energy data with prediction results.",
+        use_container_width=True
     )
 
 
