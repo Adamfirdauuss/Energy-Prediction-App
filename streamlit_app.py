@@ -189,8 +189,9 @@ elif selected == "Visual Insight":
 
 
 # Forecast Page
+# Forecast Page
 elif selected == "Forecast":
-    st.title("📊 Forecast")
+    st.title("\U0001F4CA Forecast")
     st.markdown("Use the sliders below to input values and predict Total Generation and Consumption.")
 
     features = df.drop(columns=["Date_Time", "Total (MWh)", "Consumption (MWh)"]).columns
@@ -209,9 +210,11 @@ elif selected == "Forecast":
     input_df = pd.DataFrame([user_input])
     prediction = model.predict(input_df)[0]
 
-    st.subheader("🔮 Prediction Results")
+    st.subheader("\U0001F52E Prediction Results")
     st.markdown(f"**Total Generation (MWh):** {prediction[0]:,.2f}")
     st.markdown(f"**Total Consumption (MWh):** {prediction[1]:,.2f}")
+
+
 
 # Visual Insight Page
 # Make sure to have an initial 'if' or 'elif' block before this
