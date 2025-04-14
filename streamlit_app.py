@@ -55,7 +55,7 @@ with st.sidebar:
         orientation="vertical"
     )
 
-)
+
 
 # Home Page
 if selected == "Home":
