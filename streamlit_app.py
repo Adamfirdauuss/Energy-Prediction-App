@@ -60,48 +60,59 @@ with st.sidebar:
 # Home Page
 # Home Page
 if selected == "Home":
-    # Hero banner with background image and title
+    col1, col2 = st.columns([1, 5])
+
+    with col1:
+        st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Sustainable_Development_Goal_7.svg/800px-Sustainable_Development_Goal_7.svg.png", width=100)
+
+    with col2:
+        st.title("⚡ Energy Generation & Consumption Forecasting")
+
     st.markdown("""
-        <div style="background-image: url('https://images.unsplash.com/photo-1581091870622-1f168f15f65b?auto=format&fit=crop&w=1950&q=80');
-                    background-size: cover; 
-                    padding: 4rem; 
-                    border-radius: 10px; 
-                    margin-bottom: 2rem;">
-            <h1 style="color: white; font-size: 3rem; text-shadow: 1px 1px 2px black;">⚡ Energy Generation & Consumption Forecasting</h1>
-            <p style="color: white; font-size: 1.2rem; max-width: 700px; text-shadow: 1px 1px 2px black;">
-                Gain insights and predict Turkey's electricity generation and consumption with historical data from 2020 to 2022, powered by machine learning.
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
+    Welcome to the **Energy Forecasting App** — a data-driven tool to predict **electricity generation** and **consumption** in **Turkey**, using historical hourly data from **EPIAS (2020–2022)**.
 
-    # Metrics summary
-    col1, col2, col3 = st.columns(3)
-    col1.metric("📅 Time Period", "Jan 2020 - Dec 2022")
-    col2.metric("⏰ Data Frequency", "Hourly")
-    col3.metric("⚙️ Features Used", "Energy by Type + Demand")
+    This app serves the **UN SDG Goal 7: Affordable & Clean Energy**, contributing to smarter planning and sustainability.
 
-    # Expanders for more info
-    with st.expander("📦 Dataset Summary"):
-        st.markdown("""
-        - **Time Period:** January 2020 to December 2022  
-        - **Frequency:** Hourly aggregated  
-        - **Source:** [EPIAS](https://www.epias.com.tr/en/)  
-        - **Includes:**  
-            - Energy generation by type: Natural Gas, Geothermal, Solar, Wind, Hydro, and more  
-            - Total electricity demand  
-        """)
+    ---
+    ### 🌍 About This Project
+    - **Project Title:** Improving Energy Consumption Forecasting for Sustainable and Affordable Energy Solutions  
+    - **Course:** Final Year Project  
+    - **Student Name:** Adam Firdaus  
+    - **Student ID:** TP068684  
+    - **University:** Asia Pacific University of Technology & Innovation (APU)  
+    - **Supervisor:** Mr. Ts Mohammad Namazee  
+    - **Second Marker:** Dr. Vazeerudeen Abdul Hamed  
 
-    with st.expander("🌍 Why It Matters"):
-        st.markdown("""
-        - ⚡ Improve electricity demand planning  
-        - 🌱 Support renewable energy decision-making  
-        - 💸 Optimize production costs and prevent overgeneration  
-        - 🧠 Enhance energy efficiency forecasting  
-        - 🌍 Help reduce CO₂ emissions through better insights  
-        """)
+    ---
+    ### 📌 Why It Matters:
+    - Enhance energy efficiency & forecasting
+    - Aid policy-making in renewable integration
+    - Avoid overproduction & optimize costs
+    - Reduce CO₂ emissions
+
+    ---
+    ### 📁 Dataset Overview:
+    - Energy by generation type (Natural Gas, Solar, Wind, Hydro, etc.)
+    - Target variables: Total Generation (MWh), Total Consumption (MWh)
+
+    ---
+    """)
+
+    with st.expander("📚 University Information"):
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            st.image("https://www.apu.edu.my/sites/default/files/APU_LOGO.jpg", width=100)
+        with col2:
+            st.markdown("""
+            **Asia Pacific University of Technology & Innovation (APU)**  
+            Technology Park Malaysia, Bukit Jalil  
+            Kuala Lumpur, Malaysia  
+            [Website](https://www.apu.edu.my/)
+            """)
 
     st.markdown("---")
-    st.info("Use the sidebar to navigate to Forecasting and Visual Insights.")
+    st.markdown("<div style='text-align: center;'>📊 Navigate to the top menu to access Forecasting and Visual Insights.</div>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center; font-size: 0.85rem; margin-top: 20px;'>Developed as part of a Final Year Project at APU. Powered by Python, Streamlit & Plotly.</div>", unsafe_allow_html=True)
 
 
 # Forecast Page
