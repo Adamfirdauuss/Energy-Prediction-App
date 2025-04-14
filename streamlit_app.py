@@ -159,66 +159,65 @@ if selected == "Home":
   
 
 # Forecast Page
+# Forecast Page
 elif selected == "Forecast":
     st.title("📊 Forecast: Energy Generation & Consumption")
     st.markdown("Adjust the energy source inputs below to predict Turkey’s total electricity generation and consumption.")
 
-    st.image("https://cdn-icons-png.flaticon.com/512/2011/2011448.png", width=80)  # Optional icon for flair
-
-    st.markdown("### 🔧 Input Energy Sources")
-
-    # Group features
-    renewable = ["Dammed Hydro", "River", "Wind", "Solar", "Geothermal", "Biomass"]
-    non_renewable = ["Natural Gas", "Lignite", "Import Coal", "Fuel Oil", "Asphaltite Coal", "Black Coal", "Naphta", "LNG"]
-    others = ["Import-Export", "Waste Heat"]
-
+    features = df.drop(columns=["Date_Time", "Total (MWh)", "Consumption (MWh)"]).columns
     user_input = {}
 
-    def display_slider_group(title, feature_list):
-        st.markdown(f"#### {title}")
-        cols = st.columns(2)
-        for i, feature in enumerate(feature_list):
-            with cols[i % 2]:
-                min_val = float(df[feature].min())
-                max_val = float(df[feature].max())
-                mean_val = float(df[feature].mean())
-                if min_val == max_val:
-                    max_val += 1
-                user_input[feature] = st.slider(
-                    label=feature,
-                    min_value=min_val,
-                    max_value=max_val,
-                    value=mean_val,
-                    step=0.1
-                )
+    # Group energy sources for better layout
+    st.subheader("🔧 Input Energy Sources")
 
-    with st.container():
-        display_slider_group("🌱 Renewable Energy Sources", renewable)
-        display_slider_group("⚙️ Non-Renewable Energy Sources", non_renewable)
-        display_slider_group("📦 Import & Other Sources", others)
+    # 🌱 Renewable Energy Sources
+    with st.expander("🌱 Renewable Energy Sources"):
+        for feature in ["Dammed Hydro", "Wind", "Geothermal", "River", "Solar", "Biomass"]:
+            min_val = float(df[feature].min())
+            max_val = float(df[feature].max())
+            mean_val = float(df[feature].mean())
+            user_input[feature] = st.slider(feature, min_val, max_val if max_val > min_val else min_val + 1, mean_val)
 
+    # ⚙️ Non-Renewable Energy Sources
+    with st.expander("⚙️ Non-Renewable Energy Sources"):
+        for feature in ["Natural Gas", "Import Coal", "Asphaltite Coal", "Naphta", "Lignite", "Fuel Oil", "Black Coal", "LNG"]:
+            min_val = float(df[feature].min())
+            max_val = float(df[feature].max())
+            mean_val = float(df[feature].mean())
+            user_input[feature] = st.slider(feature, min_val, max_val if max_val > min_val else min_val + 1, mean_val)
+
+    # 📦 Import & Other Sources
+    with st.expander("📦 Import & Other Sources"):
+        for feature in ["Import-Export", "Waste Heat"]:
+            min_val = float(df[feature].min())
+            max_val = float(df[feature].max())
+            mean_val = float(df[feature].mean())
+            user_input[feature] = st.slider(feature, min_val, max_val if max_val > min_val else min_val + 1, mean_val)
+
+    # Create input DataFrame
     input_df = pd.DataFrame([user_input])
+
+    # Ensure column order matches model training
+    try:
+        input_df = input_df[model.feature_names_in_]
+    except AttributeError:
+        st.error("Model does not have 'feature_names_in_' attribute. Ensure it was trained with a DataFrame.")
+        st.stop()
+
+    # Make prediction
     prediction = model.predict(input_df)[0]
 
-    # Results Section
-    st.markdown("---")
+    # Display results
     st.subheader("🔮 Prediction Results")
-
     col1, col2 = st.columns(2)
-    with col1:
-        st.metric("Total Generation (MWh)", f"{prediction[0]:,.2f}")
-        st.progress(min(prediction[0] / 60000, 1.0))  # Adjust max value accordingly
-    with col2:
-        st.metric("Total Consumption (MWh)", f"{prediction[1]:,.2f}")
-        st.progress(min(prediction[1] / 60000, 1.0))
+    col1.metric("Total Generation (MWh)", f"{prediction[0]:,.2f}")
+    col2.metric("Total Consumption (MWh)", f"{prediction[1]:,.2f}")
 
-    # Downloadable Report Button
-    st.markdown("### 📥 Download Forecast")
-    csv = input_df.copy()
-    csv["Predicted Total Generation (MWh)"] = prediction[0]
-    csv["Predicted Total Consumption (MWh)"] = prediction[1]
-    csv_file = csv.to_csv(index=False).encode('utf-8')
-    st.download_button("Download as CSV", data=csv_file, file_name="forecast_results.csv", mime='text/csv')
+    # Optional: Add download report button
+    st.download_button("📥 Download Forecast as CSV", input_df.assign(
+        Total_Generation=prediction[0],
+        Total_Consumption=prediction[1]
+    ).to_csv(index=False), file_name="forecast_result.csv")
 
 
 
