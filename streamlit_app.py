@@ -229,11 +229,11 @@ elif selected == "Forecast":
 
     # Text below results in light color for visibility
     st.markdown(
-        "<p style='color:#AAAAAA;'>Total Generation (MWh): {0:,.2f}</p>".format(prediction[0]),
+        "<p style='color:white;'>Total Generation (MWh): {0:,.2f}</p>".format(prediction[0]),
         unsafe_allow_html=True,
     )
     st.markdown(
-        "<p style='color:#AAAAAA;'>Total Consumption (MWh): {0:,.2f}</p>".format(prediction[1]),
+        "<p style='color:white;'>Total Consumption (MWh): {0:,.2f}</p>".format(prediction[1]),
         unsafe_allow_html=True,
     )
 
