@@ -89,7 +89,9 @@ if selected == "Home":
         - Enhance energy efficiency & planning  
         - Support decisions for renewable integration  
         - Avoid overproduction & optimize electricity costs  
-        - Help reduce CO₂ emissions  
+        - Optimize production costs and prevent overgeneration  
+        - Enhance energy efficiency forecasting  
+        - Help reduce CO₂ emissions through better insights
         """)
 
     with st.expander("📊 Dataset Overview"):
@@ -97,7 +99,7 @@ if selected == "Home":
         - Data Source: EPIAS  
         - Period: Jan 2020 – Dec 2022  
         - Frequency: Hourly aggregated  
-        - Features: Generation by type (e.g. Natural Gas, Hydro, Solar) & Total Demand  
+        - Features: Generation by type (e.g. Natural Gas, Hydro, Solar) & Total Demand 
         """)
 
     # 🔽 University Info
