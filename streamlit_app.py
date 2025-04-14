@@ -46,11 +46,15 @@ def load_model():
 model = load_model()
 
 # Navigation
-selected = option_menu(
-    menu_title=None,
-    options=["Home", "Forecast", "Visual Insight"],
-    icons=["house", "bar-chart", "activity"],
-    orientation="horizontal"
+# Navigation (moved to sidebar)
+with st.sidebar:
+    selected = option_menu(
+        menu_title="Navigation",
+        options=["Home", "Forecast", "Visual Insight"],
+        icons=["house", "bar-chart", "activity"],
+        orientation="vertical"
+    )
+
 )
 
 # Home Page
