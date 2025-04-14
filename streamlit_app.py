@@ -144,10 +144,7 @@ fig.update_traces(textinfo='percent+label', pull=[0.05]*len(total_by_type))  # a
 # Display the pie chart
 st.plotly_chart(fig, use_container_width=True)
 
-    # 🔽 Footer
-    st.markdown("---")
-    st.markdown("<div style='text-align: center; font-size: 0.85rem;'>📘 Developed as part of a Final Year Project at APU. Powered by Python, Streamlit & Plotly.</div>", unsafe_allow_html=True)
-
+  
 
 # Visual Insight Page
 elif selected == "Visual Insight":
