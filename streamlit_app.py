@@ -58,23 +58,51 @@ with st.sidebar:
 
 
 # Home Page
+# Home Page
 if selected == "Home":
-    st.title("⚡ Energy Generation & Consumption Forecasting")
+    # Hero banner with background image and title
     st.markdown("""
-    Welcome to the Energy Forecasting App! This tool helps predict **total electricity generation** and **consumption** in **Turkey** using historical data from **2020 to 2022**, provided by **EPIAS**.
+        <div style="background-image: url('https://images.unsplash.com/photo-1581091870622-1f168f15f65b?auto=format&fit=crop&w=1950&q=80');
+                    background-size: cover; 
+                    padding: 4rem; 
+                    border-radius: 10px; 
+                    margin-bottom: 2rem;">
+            <h1 style="color: white; font-size: 3rem; text-shadow: 1px 1px 2px black;">⚡ Energy Generation & Consumption Forecasting</h1>
+            <p style="color: white; font-size: 1.2rem; max-width: 700px; text-shadow: 1px 1px 2px black;">
+                Gain insights and predict Turkey's electricity generation and consumption with historical data from 2020 to 2022, powered by machine learning.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
 
-    **Dataset Summary**:
-    - Time Period: January 2020 to December 2022
-    - Frequency: Hourly aggregated
-    - Includes: Energy generation by type (Natural Gas, Geothermal, Solar, etc.) and total demand
+    # Metrics summary
+    col1, col2, col3 = st.columns(3)
+    col1.metric("📅 Time Period", "Jan 2020 - Dec 2022")
+    col2.metric("⏰ Data Frequency", "Hourly")
+    col3.metric("⚙️ Features Used", "Energy by Type + Demand")
 
-    **Why it matters**:
-    - Improve electricity demand planning
-    - Support decision-making for renewable integration
-    - Optimize costs and avoid overproduction
-    - Help reduce CO₂ emissions
-    - Enhance energy efficiency forecasting
-    """)
+    # Expanders for more info
+    with st.expander("📦 Dataset Summary"):
+        st.markdown("""
+        - **Time Period:** January 2020 to December 2022  
+        - **Frequency:** Hourly aggregated  
+        - **Source:** [EPIAS](https://www.epias.com.tr/en/)  
+        - **Includes:**  
+            - Energy generation by type: Natural Gas, Geothermal, Solar, Wind, Hydro, and more  
+            - Total electricity demand  
+        """)
+
+    with st.expander("🌍 Why It Matters"):
+        st.markdown("""
+        - ⚡ Improve electricity demand planning  
+        - 🌱 Support renewable energy decision-making  
+        - 💸 Optimize production costs and prevent overgeneration  
+        - 🧠 Enhance energy efficiency forecasting  
+        - 🌍 Help reduce CO₂ emissions through better insights  
+        """)
+
+    st.markdown("---")
+    st.info("Use the sidebar to navigate to Forecasting and Visual Insights.")
+
 
 # Forecast Page
 elif selected == "Forecast":
