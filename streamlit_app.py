@@ -58,6 +58,8 @@ with st.sidebar:
 
 
 
+
+
 # Home Page
 # Home Page
 df = pd.read_csv("power Generation and consumption.csv")  # replace with your actual path
@@ -151,42 +153,10 @@ if selected == "Home":
     st.markdown("<div style='text-align: center; font-size: 0.85rem;'>📘 Developed as part of a Final Year Project at APU. Powered by Python, Streamlit & Plotly.</div>", unsafe_allow_html=True)
 
 
+
+
+
   
-
-# Visual Insight Page
-elif selected == "Visual Insight":
-    st.title("📈 Visual Insights")
-    st.markdown("Interactive charts based on energy source selection.")
-
-    # Get list of energy sources from the dataset (excluding Date_Time and target columns)
-    energy_sources = df.drop(columns=["Date_Time", "Total (MWh)", "Consumption (MWh)"]).columns.tolist()
-    selected_source = st.selectbox("Choose an energy source to visualize:", energy_sources)
-
-    # Convert Date_Time to datetime with the correct format
-    df["Date_Time"] = pd.to_datetime(df["Date_Time"], format="%d.%m.%Y %H:%M")
-
-    # Create the first chart for Total Energy Generation
-    fig1 = px.line(df, x="Date_Time", y="Total (MWh)", title="Total Energy Generation Over Time", 
-                   template="plotly_dark", line_shape="linear")
-    fig1.update_traces(line=dict(color="#00BFFF"))
-    fig1.update_layout(margin=dict(t=50, b=50), xaxis_title="Time", yaxis_title="Total Energy (MWh)")
-
-    # Create the second chart for the selected energy source
-    fig2 = px.line(df, x="Date_Time", y=selected_source, title=f"{selected_source} Energy Over Time", 
-                   template="plotly_dark", line_shape="linear")
-    fig2.update_traces(line=dict(color="#32CD32"))
-    fig2.update_layout(margin=dict(t=50, b=50), xaxis_title="Time", yaxis_title=f"{selected_source} (MWh)")
-
-    # Display both charts side by side using columns
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.plotly_chart(fig1, use_container_width=True)
-
-    with col2:
-        st.plotly_chart(fig2, use_container_width=True)
-
-
 
 # Forecast Page
 elif selected == "Forecast":
@@ -249,6 +219,9 @@ elif selected == "Forecast":
     csv["Predicted Total Consumption (MWh)"] = prediction[1]
     csv_file = csv.to_csv(index=False).encode('utf-8')
     st.download_button("Download as CSV", data=csv_file, file_name="forecast_results.csv", mime='text/csv')
+
+
+
 
 
 
