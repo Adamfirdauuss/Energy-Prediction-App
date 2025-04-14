@@ -146,7 +146,7 @@ else:
 # Forecast Page
 elif selected == "Forecast":
     st.title("📊 Forecast")
-    st.markdown("Use the sliders below to input values and predict Total Generation and Consumption.")
+    st.markdown("Use the sliders below to adjust parameters and forecast future energy consumption.")
 
     features = df.drop(columns=["Date_Time", "Total (MWh)", "Consumption (MWh)"]).columns
     user_input = {}
