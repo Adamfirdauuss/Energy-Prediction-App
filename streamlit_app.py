@@ -159,65 +159,87 @@ if selected == "Home":
   
 
 # Forecast Page
-# Forecast Page
 elif selected == "Forecast":
     st.title("📊 Forecast: Energy Generation & Consumption")
     st.markdown("Adjust the energy source inputs below to predict Turkey’s total electricity generation and consumption.")
 
+    # Get list of all input features
     features = df.drop(columns=["Date_Time", "Total (MWh)", "Consumption (MWh)"]).columns
     user_input = {}
 
-    # Group energy sources for better layout
+    # Helper function to render sliders
+    def render_slider(col, feature):
+        min_val = float(df[feature].min())
+        max_val = float(df[feature].max())
+        mean_val = float(df[feature].mean())
+        if min_val == max_val:
+            max_val += 1  # Prevent slider crash
+        user_input[feature] = col.slider(
+            label=feature,
+            min_value=float(min_val),
+            max_value=float(max_val),
+            value=float(mean_val),
+        )
+
     st.subheader("🔧 Input Energy Sources")
 
-    # 🌱 Renewable Energy Sources
+    # Grouping features
+    renewable = ["Dammed Hydro", "Wind", "Geothermal", "River", "Solar", "Biomass"]
+    non_renewable = ["Natural Gas", "Import Coal", "Asphaltite Coal", "Naphta", "Lignite", "Fuel Oil", "Black Coal", "LNG"]
+    other_sources = ["Import-Export", "Waste Heat"]
+
+    # Render sliders
     with st.expander("🌱 Renewable Energy Sources"):
-        for feature in ["Dammed Hydro", "Wind", "Geothermal", "River", "Solar", "Biomass"]:
-            min_val = float(df[feature].min())
-            max_val = float(df[feature].max())
-            mean_val = float(df[feature].mean())
-            user_input[feature] = st.slider(feature, min_val, max_val if max_val > min_val else min_val + 1, mean_val)
+        cols = st.columns(2)
+        for i, feature in enumerate(renewable):
+            render_slider(cols[i % 2], feature)
 
-    # ⚙️ Non-Renewable Energy Sources
     with st.expander("⚙️ Non-Renewable Energy Sources"):
-        for feature in ["Natural Gas", "Import Coal", "Asphaltite Coal", "Naphta", "Lignite", "Fuel Oil", "Black Coal", "LNG"]:
-            min_val = float(df[feature].min())
-            max_val = float(df[feature].max())
-            mean_val = float(df[feature].mean())
-            user_input[feature] = st.slider(feature, min_val, max_val if max_val > min_val else min_val + 1, mean_val)
+        cols = st.columns(2)
+        for i, feature in enumerate(non_renewable):
+            render_slider(cols[i % 2], feature)
 
-    # 📦 Import & Other Sources
     with st.expander("📦 Import & Other Sources"):
-        for feature in ["Import-Export", "Waste Heat"]:
-            min_val = float(df[feature].min())
-            max_val = float(df[feature].max())
-            mean_val = float(df[feature].mean())
-            user_input[feature] = st.slider(feature, min_val, max_val if max_val > min_val else min_val + 1, mean_val)
+        cols = st.columns(2)
+        for i, feature in enumerate(other_sources):
+            render_slider(cols[i % 2], feature)
 
     # Create input DataFrame
     input_df = pd.DataFrame([user_input])
 
-    # Ensure column order matches model training
+    # Ensure feature order matches model
     try:
         input_df = input_df[model.feature_names_in_]
     except AttributeError:
-        st.error("Model does not have 'feature_names_in_' attribute. Ensure it was trained with a DataFrame.")
+        st.error("Model doesn't contain feature names. Ensure the model was trained on a DataFrame.")
+        st.stop()
+    except KeyError:
+        st.error("Input features don't match model features. Please verify.")
         st.stop()
 
-    # Make prediction
+    # Prediction
     prediction = model.predict(input_df)[0]
 
     # Display results
     st.subheader("🔮 Prediction Results")
+
     col1, col2 = st.columns(2)
     col1.metric("Total Generation (MWh)", f"{prediction[0]:,.2f}")
     col2.metric("Total Consumption (MWh)", f"{prediction[1]:,.2f}")
 
-    # Optional: Add download report button
-    st.download_button("📥 Download Forecast as CSV", input_df.assign(
-        Total_Generation=prediction[0],
-        Total_Consumption=prediction[1]
-    ).to_csv(index=False), file_name="forecast_result.csv")
+    # Optional: Add bar chart
+    st.markdown("### 📈 Forecast Breakdown")
+    st.bar_chart(pd.DataFrame({
+        "Forecast (MWh)": [prediction[0], prediction[1]]
+    }, index=["Generation", "Consumption"]))
+
+    # Optional: Add download button
+    st.download_button(
+        label="📥 Download Forecast",
+        data=input_df.to_csv(index=False),
+        file_name="energy_forecast_input.csv",
+        mime="text/csv",
+    )
 
 
 
