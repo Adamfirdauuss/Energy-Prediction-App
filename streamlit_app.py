@@ -117,19 +117,15 @@ if selected == "Home":
             """)
 
     # 🔽 Interactive Pie Chart
-  # Correct the generation columns list based on your actual dataset
-generation_types = [
-    'Natural Gas', 'Dammed Hydro', 'Lignite', 'River', 'Import Coal', 'Wind',
-    'Solar', 'Fuel Oil', 'Geothermal', 'Asphaltite Coal', 'Black Coal', 'Biomass',
-    'Naphta', 'LNG', 'Import-Export', 'Waste Heat'
-]
+    st.markdown("---")
+    st.subheader("🔍 Total Energy Generation Breakdown by Type")
 
-# Ensure the columns exist before performing the sum
-if all(col in df.columns for col in generation_types):
+    # Assuming generation columns are like: 'Natural Gas', 'Solar', 'Hydro', etc.
+    generation_types = ['Natural Gas', 'Solar', 'Hydro', 'Wind', 'Geothermal', 'Coal']  # customize based on your dataset
+
     total_by_type = df[generation_types].sum().reset_index()
     total_by_type.columns = ['Energy Type', 'Total (MWh)']
 
-    # Create pie chart with Plotly
     fig = px.pie(
         total_by_type,
         names='Energy Type',
@@ -140,33 +136,11 @@ if all(col in df.columns for col in generation_types):
     fig.update_traces(textinfo='percent+label', pull=[0.05]*len(total_by_type))  # adds hover + explode effect
 
     st.plotly_chart(fig, use_container_width=True)
-else:
-    st.error("Some required columns are missing from the dataset.")
 
-# Forecast Page
-elif selected == "Forecast":
-    st.title("📊 Forecast")
-    st.markdown("Use the sliders below to adjust parameters and forecast future energy consumption.")
+    # 🔽 Footer
+    st.markdown("---")
+    st.markdown("<div style='text-align: center; font-size: 0.85rem;'>📘 Developed as part of a Final Year Project at APU. Powered by Python, Streamlit & Plotly.</div>", unsafe_allow_html=True)
 
-    features = df.drop(columns=["Date_Time", "Total (MWh)", "Consumption (MWh)"]).columns
-    user_input = {}
-
-    for feature in features:
-        min_val = float(df[feature].min())
-        max_val = float(df[feature].max())
-        mean_val = float(df[feature].mean())
-        if min_val == max_val:
-            max_val += 1  # Prevent slider crash
-        user_input[feature] = st.slider(
-            feature, float(min_val), float(max_val), float(mean_val)
-        )
-
-    input_df = pd.DataFrame([user_input])
-    prediction = model.predict(input_df)[0]
-
-    st.subheader("🔮 Prediction Results")
-    st.markdown(f"**Total Generation (MWh):** {prediction[0]:,.2f}")
-    st.markdown(f"**Total Consumption (MWh):** {prediction[1]:,.2f}")
 
 # Visual Insight Page
 elif selected == "Visual Insight":
