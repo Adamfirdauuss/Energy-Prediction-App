@@ -275,7 +275,7 @@ elif selected == "Forecast":
     )
 
    # Display the interactive Plotly chart
-   st.plotly_chart(bar_fig, use_container_width=True)
+    st.plotly_chart(bar_fig, use_container_width=True)
 
    # Optional: Add download button with prediction results
    download_data = input_df.copy()
