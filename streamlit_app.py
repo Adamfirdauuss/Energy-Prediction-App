@@ -223,9 +223,7 @@ elif selected == "Forecast":
     # Display results
     st.subheader("🔮 Prediction Results")
 
-    col1, col2 = st.columns(2)
-    col1.metric("Total Generation (MWh)", f"{prediction[0]:,.2f}")
-    col2.metric("Total Consumption (MWh)", f"{prediction[1]:,.2f}")
+    
 
     # Text below results in light color for visibility
     # Text below results in white font for visibility
