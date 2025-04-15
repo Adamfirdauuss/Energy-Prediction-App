@@ -285,7 +285,7 @@ elif selected == "Forecast":
     st.markdown("""
     <style>
     .download-button-text {
-        color: white;
+        color: black;
     }
     </style>
     """, unsafe_allow_html=True)
