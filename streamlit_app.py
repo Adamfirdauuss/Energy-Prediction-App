@@ -243,8 +243,7 @@ elif selected == "Forecast":
 
 
 
-    # Improved Graph (Bar Chart)
-    st.markdown("### 📈 Forecast Breakdown")
+   
     # Improved Graph (Bar Chart)
     st.markdown("### 📈 Forecast Breakdown")
 
