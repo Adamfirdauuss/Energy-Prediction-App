@@ -281,6 +281,15 @@ elif selected == "Forecast":
     download_data['Total Generation (MWh)'] = prediction[0]
     download_data['Total Consumption (MWh)'] = prediction[1]
 
+    # Apply custom styling to the download button label to make it white
+    st.markdown("""
+    <style>
+    .download-button-text {
+        color: white;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     st.download_button(
      label="📥 Download Forecast with Results",
      data=download_data.to_csv(index=False),
