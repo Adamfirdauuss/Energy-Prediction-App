@@ -228,14 +228,16 @@ elif selected == "Forecast":
     col2.metric("Total Consumption (MWh)", f"{prediction[1]:,.2f}")
 
     # Text below results in light color for visibility
-    st.markdown(
-        "<p style='color:#AAAAAA;'>Total Generation (MWh): {0:,.2f}</p>".format(prediction[0]),
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        "<p style='color:#AAAAAA;'>Total Consumption (MWh): {0:,.2f}</p>".format(prediction[1]),
-        unsafe_allow_html=True,
-    )
+    # Text below results in white font for visibility
+st.markdown(
+    f"<h4 style='color:white;'>Total Generation (MWh)</h4><h2 style='color:white;'>{prediction[0]:,.2f}</h2>",
+    unsafe_allow_html=True
+)
+st.markdown(
+    f"<h4 style='color:white;'>Total Consumption (MWh)</h4><h2 style='color:white;'>{prediction[1]:,.2f}</h2>",
+    unsafe_allow_html=True
+)
+
 
     # Improved Graph (Bar Chart)
     st.markdown("### 📈 Forecast Breakdown")
