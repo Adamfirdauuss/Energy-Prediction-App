@@ -245,26 +245,52 @@ elif selected == "Forecast":
 
     # Improved Graph (Bar Chart)
     st.markdown("### 📈 Forecast Breakdown")
-    data = pd.DataFrame({
-        "Energy Type": ["Total Generation", "Total Consumption"],
-        "MWh": [prediction[0], prediction[1]]
-    })
+    # Improved Graph (Bar Chart)
+    st.markdown("### 📈 Forecast Breakdown")
 
-    st.bar_chart(data.set_index("Energy Type"))
+    # Create a Plotly bar chart
+    import plotly.graph_objects as go
 
-    # Optional: Add download button with prediction results
-    download_data = input_df.copy()
-    download_data['Total Generation (MWh)'] = prediction[0]
-    download_data['Total Consumption (MWh)'] = prediction[1]
-
-    st.download_button(
-        label="📥 Download Forecast with Results",
-        data=download_data.to_csv(index=False),
-        file_name="energy_forecast_with_results.csv",
-        mime="text/csv",
-        help="Click to download the forecasted energy data with prediction results.",
-        use_container_width=True
+    bar_fig = go.Figure(
+       data=[
+         go.Bar(
+            x=["Total Generation", "Total Consumption"],
+            y=[prediction[0], prediction[1]],
+            marker_color=["#1f77b4", "#ff7f0e"],  # Colors for the bars
+            text=[f"{prediction[0]:,.2f}", f"{prediction[1]:,.2f}"],  # Add values on top of bars
+            textposition="auto"  # Automatically position the text inside the bars
+            )
+        ]
     )
+
+    # Update layout with title, axes, and styling
+    bar_fig.update_layout(
+     template="plotly_dark",  # Use dark template
+     xaxis_title="Energy Type",  # X-axis label
+     yaxis_title="MWh",  # Y-axis label
+     title="Predicted Total Energy Generation and Consumption",  # Chart title
+     title_font=dict(size=18),  # Title font size
+     margin=dict(t=50, b=50),  # Margins for top and bottom
+     height=450  # Set the height for the chart
+    )
+
+   # Display the interactive Plotly chart
+   st.plotly_chart(bar_fig, use_container_width=True)
+
+   # Optional: Add download button with prediction results
+   download_data = input_df.copy()
+   download_data['Total Generation (MWh)'] = prediction[0]
+   download_data['Total Consumption (MWh)'] = prediction[1]
+
+   st.download_button(
+    label="📥 Download Forecast with Results",
+    data=download_data.to_csv(index=False),
+    file_name="energy_forecast_with_results.csv",
+    mime="text/csv",
+    help="Click to download the forecasted energy data with prediction results.",
+    use_container_width=True
+    )
+
 
 
 
