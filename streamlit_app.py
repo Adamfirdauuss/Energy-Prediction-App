@@ -285,6 +285,17 @@ elif selected == "Visual Insight":
     st.title("📈 Visual Insights")
     st.markdown("Interactive charts based on energy source selection.")
 
+    # Inject CSS to style the label text white
+    st.markdown("""
+    <style>
+    .stSlider > label, .stDateInput > label {
+        color: white !important;
+        font-weight: bold;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
     # Get list of energy sources from the dataset (excluding Date_Time and target columns)
     energy_sources = df.drop(columns=["Date_Time", "Total (MWh)", "Consumption (MWh)"]).columns.tolist()
     selected_source = st.selectbox("Choose an energy source to visualize:", energy_sources)
