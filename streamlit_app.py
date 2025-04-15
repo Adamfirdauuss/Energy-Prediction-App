@@ -402,6 +402,21 @@ elif selected == "Visual Insight":
     with col2:
         st.plotly_chart(fig2, use_container_width=True)
 
+    # Apply custom styling to make the download button white with black text
+    st.markdown("""
+    <style>
+    .stDownloadButton button {
+        background-color: white !important;
+        color: black !important;
+        border: 2px solid black;
+    }
+    .stDownloadButton button:hover {
+        background-color: #f0f0f0 !important;
+        color: black !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     # Download button for filtered data
     st.download_button("📥 Download Filtered Data (CSV)",
                        data=filtered_df.to_csv(index=False),
