@@ -281,11 +281,17 @@ elif selected == "Forecast":
     download_data['Total Generation (MWh)'] = prediction[0]
     download_data['Total Consumption (MWh)'] = prediction[1]
 
-    # Apply custom styling to the download button label to make it white
+    # Apply custom styling to make the download button white with black text
     st.markdown("""
     <style>
-    .download-button-text {
-        color: black;
+    .stDownloadButton button {
+        background-color: white !important;
+        color: black !important;
+        border: 2px solid black;
+    }
+    .stDownloadButton button:hover {
+        background-color: #f0f0f0 !important;
+        color: black !important;
     }
     </style>
     """, unsafe_allow_html=True)
