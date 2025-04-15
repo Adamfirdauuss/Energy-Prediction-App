@@ -278,18 +278,18 @@ elif selected == "Forecast":
     st.plotly_chart(bar_fig, use_container_width=True)
 
    # Optional: Add download button with prediction results
-   download_data = input_df.copy()
-   download_data['Total Generation (MWh)'] = prediction[0]
-   download_data['Total Consumption (MWh)'] = prediction[1]
+    download_data = input_df.copy()
+    download_data['Total Generation (MWh)'] = prediction[0]
+    download_data['Total Consumption (MWh)'] = prediction[1]
 
-   st.download_button(
-    label="📥 Download Forecast with Results",
-    data=download_data.to_csv(index=False),
-    file_name="energy_forecast_with_results.csv",
-    mime="text/csv",
-    help="Click to download the forecasted energy data with prediction results.",
-    use_container_width=True
-    )
+    st.download_button(
+     label="📥 Download Forecast with Results",
+     data=download_data.to_csv(index=False),
+     file_name="energy_forecast_with_results.csv",
+     mime="text/csv",
+     help="Click to download the forecasted energy data with prediction results.",
+     use_container_width=True
+     )
 
 
 
