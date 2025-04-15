@@ -229,14 +229,14 @@ elif selected == "Forecast":
 
     # Text below results in light color for visibility
     # Text below results in white font for visibility
-st.markdown(
+    st.markdown(
     f"<h4 style='color:white;'>Total Generation (MWh)</h4><h2 style='color:white;'>{prediction[0]:,.2f}</h2>",
     unsafe_allow_html=True
-)
-st.markdown(
+    )
+    st.markdown(
     f"<h4 style='color:white;'>Total Consumption (MWh)</h4><h2 style='color:white;'>{prediction[1]:,.2f}</h2>",
     unsafe_allow_html=True
-)
+    )
 
 
     # Improved Graph (Bar Chart)
