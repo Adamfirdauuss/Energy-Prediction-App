@@ -269,6 +269,7 @@ elif selected == "Forecast":
 
 
 # Visual Insight Page
+# Visual Insight Page
 # Make sure to have an initial 'if' or 'elif' block before this
 if selected == "Home":
     st.title("🏠 Home")
@@ -291,23 +292,54 @@ elif selected == "Visual Insight":
     # Convert Date_Time to datetime with the correct format
     df["Date_Time"] = pd.to_datetime(df["Date_Time"], format="%d.%m.%Y %H:%M")
 
+    # Date range filter
+    min_date = df["Date_Time"].min()
+    max_date = df["Date_Time"].max()
+    start_date, end_date = st.date_input("Select time range:", [min_date, max_date])
+
+    # Filter data by selected date range
+    mask = (df["Date_Time"] >= pd.to_datetime(start_date)) & (df["Date_Time"] <= pd.to_datetime(end_date))
+    filtered_df = df.loc[mask].copy()
+
+    # Add rolling average for the selected source
+    filtered_df["Rolling Avg"] = filtered_df[selected_source].rolling(window=7).mean()
+
+    # Insight Summary
+    with st.expander("🔍 Quick Insight Summary"):
+        st.markdown(
+            f"""
+            - **Most recent Total Energy Generation**: {df['Total (MWh)'].iloc[-1]:,.2f} MWh  
+            - **Most recent Consumption**: {df['Consumption (MWh)'].iloc[-1]:,.2f} MWh  
+            - **Selected Source Latest Output**: {df[selected_source].iloc[-1]:,.2f} MWh  
+            """
+        )
+
     # Create the first chart for Total Energy Generation
-    fig1 = px.line(df, x="Date_Time", y="Total (MWh)", title="Total Energy Generation Over Time", 
+    fig1 = px.line(filtered_df, x="Date_Time", y="Total (MWh)", title="Total Energy Generation Over Time", 
                    template="plotly_dark", line_shape="linear")
     fig1.update_traces(line=dict(color="#00BFFF"))
     fig1.update_layout(margin=dict(t=50, b=50), xaxis_title="Time", yaxis_title="Total Energy (MWh)")
 
-    # Create the second chart for the selected energy source
-    fig2 = px.line(df, x="Date_Time", y=selected_source, title=f"{selected_source} Energy Over Time", 
-                   template="plotly_dark", line_shape="linear")
-    fig2.update_traces(line=dict(color="#32CD32"))
+    # Create the second chart for the selected energy source with rolling average
+    fig2 = px.line(filtered_df, x="Date_Time", y=[selected_source, "Rolling Avg"],
+                   labels={"value": "Energy (MWh)", "variable": "Type"},
+                   title=f"{selected_source} Energy Over Time with 7-Day Average",
+                   template="plotly_dark")
     fig2.update_layout(margin=dict(t=50, b=50), xaxis_title="Time", yaxis_title=f"{selected_source} (MWh)")
 
     # Display both charts side by side using columns
     col1, col2 = st.columns(2)
-
     with col1:
         st.plotly_chart(fig1, use_container_width=True)
-
     with col2:
         st.plotly_chart(fig2, use_container_width=True)
+
+    # Download button for filtered data
+    st.download_button("📥 Download Filtered Data (CSV)",
+                       data=filtered_df.to_csv(index=False),
+                       file_name=f"{selected_source}_visual_insight.csv",
+                       mime="text/csv")
+
+    # Footer
+    st.markdown("---")
+    st.markdown("<p style='text-align:center; color:gray;'>Visualized with ❤️ using Streamlit and Plotly</p>", unsafe_allow_html=True)
