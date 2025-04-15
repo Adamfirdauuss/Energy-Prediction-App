@@ -285,15 +285,26 @@ elif selected == "Visual Insight":
     st.title("📈 Visual Insights")
     st.markdown("Interactive charts based on energy source selection.")
 
-    # Inject CSS to style the label text white
     st.markdown("""
     <style>
-    .stSlider > label, .stDateInput > label {
+    /* Force label text to white for sliders and date inputs */
+    label, .stSlider label, .stDateInput label, .css-149m0r1, .css-81oif8 {
         color: white !important;
-        font-weight: bold;
+        font-weight: bold !important;
+    }
+
+    /* Optional: white text for all selectboxes, sliders, and inputs */
+    .stSelectbox > label, .stTextInput > label {
+        color: white !important;
+    }
+
+    /* Optional: make slider tick values white */
+    .stSlider .css-1m3z3qc {
+        color: white !important;
     }
     </style>
     """, unsafe_allow_html=True)
+
 
 
     # Get list of energy sources from the dataset (excluding Date_Time and target columns)
